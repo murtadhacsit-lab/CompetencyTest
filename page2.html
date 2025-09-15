@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة التدريب على الامتحانات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #7209b7;
+            --success-color: #4cc9f0;
+            --light-bg: #f8f9fa;
+            --dark-text: #2b2d42;
+            --light-text: #6c757d;
+            --white: #ffffff;
+            --correct: #2ec4b6;
+            --incorrect: #e71d36;
+            --subject-arabic: #3a0ca3;
+            --subject-english: #7209b7;
+            --subject-computer: #4361ee;
+            --set-1: #3a0ca3;
+            --set-2: #4361ee;
+            --set-3: #4cc9f0;
+            --set-4: #7209b7;
+            
+            /* متغيرات الوضع الليلي */
+            --bg-color: #f8f9fa;
+            --text-color: #2b2d42;
+            --card-bg: #ffffff;
+            --header-bg: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            --question-bg: #f8f9fa;
+            --option-bg: #ffffff;
+            --option-border: #e6e6e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a2e;
+            --text-color: #e6e6e6;
+            --card-bg: #16213e;
+            --header-bg: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%);
+            --question-bg: #0f3460;
+            --option-bg: #16213e;
+            --option-border: #1e5128;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px var(--shadow-color);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* زر الوضع الليلي */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* تصميم الهيدر */
+        .header {
+            background: var(--header-bg);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 20%, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 40%, transparent 40%, transparent);
+            background-size: 10px 10px;
+            opacity: 0.5;
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+        }
+        
+        /* تصميم بطاقات المواد */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 2rem;
+        }
+        
+        .subject-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 20px var(--shadow-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-color);
+        }
+        
+        .subject-card.arabic::before { background: var(--subject-arabic); }
+        .subject-card.english::before { background: var(--subject-english); }
+        .subject-card.computer::before { background: var(--subject-computer); }
+        
+        .subject-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px var(--shadow-color);
+        }
+        
+        .subject-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .subject-card.arabic i { color: var(--subject-arabic); }
+        .subject-card.english i { color: var(--subject-english); }
+        .subject-card.computer i { color: var(--subject-computer); }
+        
+        .subject-card h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .subject-card p {
+            color: var(--light-text);
+            font-size: 0.95rem;
+        }
+        
+        /* تصميم مجموعة الأسئلة */
+        .quiz-container {
+            display: none;
+            padding: 0;
+        }
+        
+        .quiz-header {
+            background: var(--header-bg);
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .set-indicator {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .set-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .set-dot.active {
+            background: var(--white);
+            transform: scale(1.2);
+        }
+        
+        .set-dot.set-1.active { background: var(--set-1); }
+        .set-dot.set-2.active { background: var(--set-2); }
+        .set-dot.set-3.active { background: var(--set-3); }
+        .set-dot.set-4.active { background: var(--set-4); }
+        
+        .question-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .set-content {
+            padding: 2rem;
+        }
+        
+        .questions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .question-box {
+            background: var(--question-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .question-box.set-1 { border-left-color: var(--set-1); }
+        .question-box.set-2 { border-left-color: var(--set-2); }
+        .question-box.set-3 { border-left-color: var(--set-3); }
+        .question-box.set-4 { border-left-color: var(--set-4); }
+        
+        .question-number {
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .question-box.set-1 .question-number { color: var(--set-1); }
+        .question-box.set-2 .question-number { color: var(--set-2); }
+        .question-box.set-3 .question-number { color: var(--set-3); }
+        .question-box.set-4 .question-number { color: var(--set-4); }
+        
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .option {
+            background: var(--option-bg);
+            border: 2px solid var(--option-border);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .option:hover {
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+        
+        .option-prefix {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .dark-mode .option-prefix {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .option.selected .option-prefix {
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--white);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--option-border);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .btn-secondary {
+            background: var(--question-bg);
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #e6e6e6;
+        }
+        
+        .dark-mode .btn-secondary {
+            background: #2d3748;
+        }
+        
+        .dark-mode .btn-secondary:hover {
+            background: #4a5568;
+        }
+        
+        .btn-change {
+            background: var(--accent-color);
+            color: var(--white);
+        }
+        
+        .btn-change:hover {
+            background: #5a08a0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* تصميم قسم النتائج */
+        .results-container {
+            display: none;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .results-header {
+            margin-bottom: 2rem;
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+        
+        .score-container {
+            background: var(--header-bg);
+            color: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 400px;
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }
+        
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-total {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .wrong-answers {
+            text-align: right;
+            margin-top: 2rem;
+        }
+        
+        .wrong-title {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--option-border);
+        }
+        
+        .wrong-item {
+            background: var(--question-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: right;
+        }
+        
+        .wrong-question {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .answer-comparison {
+            display: flex;
+            gap: 15px;
+            margin-top: 1rem;
+        }
+        
+        .user-answer, .correct-answer {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .user-answer {
+            background: #ffe9ec;
+            color: var(--incorrect);
+            border: 1px solid #ffccd5;
+        }
+        
+        .dark-mode .user-answer {
+            background: #4a1c29;
+            border-color: #7a2d40;
+        }
+        
+        .correct-answer {
+            background: #e6f7f5;
+            color: var(--correct);
+            border: 1px solid #b8e8e3;
+        }
+        
+        .dark-mode .correct-answer {
+            background: #1c3b38;
+            border-color: #2a5e57;
+        }
+        
+        .results-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+            
+            .quiz-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .set-content {
+                padding: 1.5rem;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .answer-comparison {
+                flex-direction: column;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                left: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- زر الوضع الليلي -->
+        <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <!-- الهيدر -->
+        <div class="header">
+            <h1>منصة التدريب على الامتحانات</h1>
+            <p>اختر المادة للبدء في التدريب على الأسئلة</p>
+        </div>
+        
+        <!-- قسم المواد -->
+        <div class="subjects-grid" id="subjects-container">
+            <div class="subject-card arabic" data-subject="arabic">
+                <i class="fas fa-book"></i>
+                <h3>اللغة العربية</h3>
+                <p>اختبار في قواعد اللغة والأدب</p>
+            </div>
+            
+            <div class="subject-card english" data-subject="english">
+                <i class="fas fa-language"></i>
+                <h3>اللغة الإنجليزية</h3>
+                <p>اختبار في القواعد والمفردات</p>
+            </div>
+            
+            <div class="subject-card computer" data-subject="computer">
+                <i class="fas fa-laptop-code"></i>
+                <h3>الحاسوب</h3>
+                <p>اختبار في أساسيات الحاسوب</p>
+            </div>
+        </div>
+        
+        <!-- قسم الأسئلة -->
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <div class="quiz-title" id="quiz-title">اختبار الحاسوب</div>
+                <div class="set-indicator" id="set-indicator">
+                    <div class="set-dot set-1 active" data-set="0"></div>
+                    <div class="set-dot set-2" data-set="1"></div>
+                    <div class="set-dot set-3" data-set="2"></div>
+                    <div class="set-dot set-4" data-set="3"></div>
+                </div>
+                <div class="question-counter" id="question-counter">المجموعة 1 من 4 (الأسئلة 1-10)</div>
+            </div>
+            
+            <div class="set-content">
+                <div class="questions-grid" id="questions-container">
+                    <!-- سيتم إضافة الأسئلة هنا -->
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prev-set-btn" disabled>
+                    <i class="fas fa-arrow-right"></i> المجموعة السابقة
+                </button>
+                <button class="btn btn-change" id="change-questions-btn">
+                    <i class="fas fa-sync-alt"></i> توليد أسئلة جديدة
+                </button>
+                <button class="btn btn-primary" id="next-set-btn">
+                    المجموعة التالية <i class="fas fa-arrow-left"></i>
+                </button>
+                <button class="btn btn-primary" id="submit-btn" style="display: none;">
+                    <i class="fas fa-paper-plane"></i> تسليم الإجابات
+                </button>
+            </div>
+        </div>
+        
+        <!-- قسم النتائج -->
+        <div class="results-container" id="results-container">
+            <div class="results-header">
+                <h2 class="results-title">نتيجة الاختبار</h2>
+                <p>لقد أكملت الاختبار بنجاح，以下 هي نتيجتك</p>
+            </div>
+            
+            <div class="score-container">
+                <div class="score-value" id="score-value">0</div>
+                <div class="score-total">من 100</div>
+            </div>
+            
+            <div class="wrong-answers" id="wrong-answers-container">
+                <h3 class="wrong-title">الأسئلة التي underperformed فيها</h3>
+                <!-- سيتم إضافة الأسئلة الخاطئة هنا عبر JavaScript -->
+            </div>
+            
+            <div class="results-actions">
+                <button class="btn btn-secondary" id="restart-btn">
+                    <i class="fas fa-home"></i> العودة إلى الرئيسية
+                </button>
+                <button class="btn btn-change" id="try-again-btn">
+                    <i class="fas fa-sync-alt"></i> توليد أسئلة جديدة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات المواد
+        const subjects = [
+            { id: 'arabic', name: 'اللغة العربية', icon: 'book' },
+            { id: 'english', name: 'اللغة الإنجليزية', icon: 'language' },
+            { id: 'computer', name: 'الحاسوب', icon: 'laptop-code' }
+        ];
+
+        // إنشاء بنك أسئلة كبير لكل مادة (بدون تكرار)
+        const questionBanks = {
+            computer: [
+                {
+                    question: "التأثيرات الخاصة المستخدمة لتقديم الشرائح في عرض تقديمي تسمى:",
+                    options: ["التأثيرات", "الرسوم المتحركة المخصصة", "الانتقالات", "الرسوم المتحركة العرضية"],
+                    correct: 2
+                },
+                {
+                    question: "يمكنك تحرير كائن مخطط منظمة مضمن عن طريق",
+                    options: [
+                        "النقر على تحرير الكائن",
+                        "النقر المزدوج على كائن المخطط",
+                        "النقر بزر الماوس الأيمن على الكائن ثم اختيار تحرير مخطط المنظمة",
+                        "الخياران ب و ج معا"
+                    ],
+                    correct: 3
+                },
+                {
+                    question: "أي من البرامج التالية يستخدم لإنشاء الجداول الحسابية؟",
+                    options: ["Word", "Excel", "PowerPoint", "Access"],
+                    correct: 1
+                },
+                {
+                    question: "ما هي لغة الترميز المستخدمة في إنشاء صفحات الويب؟",
+                    options: ["HTML", "Python", "Java", "C++"],
+                    correct: 0
+                },
+                {
+                    question: "أي من هذه المكونات يعتبر من وحدات الإدخال؟",
+                    options: ["الشاشة", "الطابعة", "لوحة المفاتيح", "السماعات"],
+                    correct: 2
+                },
+                {
+                    question: "ما هو البرنامج المستخدم لتصفح الإنترنت؟",
+                    options: ["Excel", "PowerPoint", "متصفح الويب", "Word"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي وحدة القياس الرئيسية لسعة التخزين؟",
+                    options: ["هرتز", "بايت", "بكسل", "بت"],
+                    correct: 1
+                },
+                {
+                    question: "أي من هذه ليس نظام تشغيل؟",
+                    options: ["Windows", "Linux", "Android", "Google"],
+                    correct: 3
+                },
+                {
+                    question: "ما هو الجهاز المسؤول عن توصيل الشبكات؟",
+                    options: ["الطابعة", "المودم", "الشاشة", "لوحة المفاتيح"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو الامتداد الخاص بملفات الصور النقطية؟",
+                    options: [".docx", ".xlsx", ".jpg", ".mp3"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي لغة البرمجة المستخدمة لإنشاء صفحات ويب تفاعلية؟",
+                    options: ["HTML", "CSS", "JavaScript", "Python"],
+                    correct: 2
+                },
+                {
+                    question: "ما هو البرنامج المستخدم لحماية الجهاز من الفيروسات؟",
+                    options: ["مضاد الفيروسات", "معالج النصوص", "الجداول الحسابية", "قاعدة البيانات"],
+                    correct: 0
+                },
+                {
+                    question: "ما هو الجهاز الذي يحول التيار المتردد إلى تيار مستمر؟",
+                    options: ["الشاشة", "لوحة المفاتيح", "مزود الطاقة", "الماوس"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي تقنية الاتصال اللاسلكي قصيرة المدى؟",
+                    options: ["Bluetooth", "Wi-Fi", "4G", "Ethernet"],
+                    correct: 0
+                },
+                {
+                    question: "ما هو البرنامج الذي يدير موارد الحاسوب؟",
+                    options: ["التطبيقات", "الألعاب", "نظام التشغيل", "متصفح الإنترنت"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي لغة الترميز المستخدمة لإنشاء هياكل صفحات الويب؟",
+                    options: ["CSS", "JavaScript", "HTML", "Python"],
+                    correct: 2
+                },
+                {
+                    question: "ما هو البرنامج المستخدم لإنشاء العروض التقديمية؟",
+                    options: ["Excel", "Word", "PowerPoint", "Access"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي الذاكرة المؤقتة التي يستخدمها المعالج؟",
+                    options: ["القرص الصلب", "الذاكرة العشوائية", "الذاكرة الدائمة", "القرص المرن"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو الجهاز الذي يخزن البيانات بشكل دائم؟",
+                    options: ["الذاكرة العشوائية", "القرص الصلب", "المعالج", "اللوحة الأم"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو البروتوكول المستخدم لإرسال البريد الإلكتروني؟",
+                    options: ["HTTP", "FTP", "SMTP", "TCP"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي لغة البرمجة التي طورتها مايكروسوفت؟",
+                    options: ["Java", "C#", "Python", "PHP"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو البرنامج المستخدم لتصميم وتحرير الصور؟",
+                    options: ["Excel", "Word", "Photoshop", "PowerPoint"],
+                    correct: 2
+                },
+                {
+                    question: "ما هو الجهاز الذي ينقل البيانات بين الشبكات؟",
+                    options: ["المودم", "الموجه", "المحول", "جدار الحماية"],
+                    correct: 1
+                },
+                {
+                    question: "ما هي تقنية تخزين البيانات على الإنترنت؟",
+                    options: ["القرص الصلب", "التخزين السحابي", "القرص المرن", "الذاكرة العشوائية"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو البرنامج الذي يترجم لغة البرمجة إلى لغة الآلة؟",
+                    options: ["المترجم", "المحرر", "المتصفح", "نظام التشغيل"],
+                    correct: 0
+                },
+                {
+                    question: "ما هو الامتداد الخاص بملفات الفيديو؟",
+                    options: [".mp3", ".jpg", ".mp4", ".docx"],
+                    correct: 2
+                },
+                {
+                    question: "ما هي لغة الاستعلامات المستخدمة في قواعد البيانات؟",
+                    options: ["HTML", "SQL", "Java", "CSS"],
+                    correct: 1
+                },
+                {
+                    question: "ما هو البروتوكول المستخدم لتصفح الإنترنت؟",
+                    options: ["FTP", "SMTP", "HTTP", "TCP"],
+                    correct: 2
+                },
+                {
+                    question: "ما هو الجهاز المسؤول عن عرض الصور والنصوص؟",
+                    options: ["الطابعة", "الشاشة", "لوحة المفاتيح", "الماوس"],
+                    correct: 1
+                },
+                {
+                    question: "ما هي التقنية المستخدمة للاتصال بالإنترنت عبر الهاتف؟",
+                    options: ["DSL", "Dial-up", "Wi-Fi", "Bluetooth"],
+                    correct: 1
+                }
+            ],
+            arabic: [
+                {
+                    question: "ما هو جمع كلمة 'كتاب'؟",
+                    options: ["كتب", "كُتب", "كتابات", "كتيبات"],
+                    correct: 1
+                },
+                {
+                    question: "ما نوع الجملة التالية: 'الطالب يذاكر بجد'؟",
+                    options: ["اسمية", "فعلية", "شبه جملة", "طلبية"],
+                    correct: 0
+                }
+                // يمكن إضافة المزيد من الأسئلة هنا
+            ],
+            english: [
+                {
+                    question: "What is the past tense of 'go'?",
+                    options: ["goed", "went", "goes", "going"],
+                    correct: 1
+                },
+                {
+                    question: "Which word is a synonym of 'happy'?",
+                    options: ["sad", "joyful", "angry", "tired"],
+                    correct: 1
+                }
+                // يمكن إضافة المزيد من الأسئلة هنا
+            ]
+        };
+
+        // عناصر DOM
+        const themeToggle = document.getElementById('theme-toggle');
+        const subjectsContainer = document.getElementById('subjects-container');
+        const quizContainer = document.getElementById('quiz-container');
+        const quizTitle = document.getElementById('quiz-title');
+        const setIndicator = document.getElementById('set-indicator');
+        const questionCounter = document.getElementById('question-counter');
+        const questionsContainer = document.getElementById('questions-container');
+        const prevSetBtn = document.getElementById('prev-set-btn');
+        const nextSetBtn = document.getElementById('next-set-btn');
+        const changeQuestionsBtn = document.getElementById('change-questions-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreValue = document.getElementById('score-value');
+        const wrongAnswersContainer = document.getElementById('wrong-answers-container');
+        const restartBtn = document.getElementById('restart-btn');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+
+        // متغيرات التطبيق
+        let currentSubject = null;
+        let currentQuestions = [];
+        let currentSetIndex = 0;
+        let userAnswers = [];
+        let score = 0;
+        const questionsPerSet = 10;
+        const totalQuestions = 40;
+        const totalSets = 4;
+        const pointsPerQuestion = 2.5;
+        let usedQuestionIndices = new Set();
+
+        // تهيئة الصفحة
+        function init() {
+            setupEventListeners();
+            loadThemePreference();
+        }
+
+        // إعداد مستمعي الأحداث
+        function setupEventListeners() {
+            // مستمعي أحداث بطاقات المواد
+            document.querySelectorAll('.subject-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const subject = card.getAttribute('data-subject');
+                    startQuiz(subject);
+                });
+            });
+            
+            // مستمعي أحداث الأزرار
+            prevSetBtn.addEventListener('click', showPreviousSet);
+            nextSetBtn.addEventListener('click', showNextSet);
+            changeQuestionsBtn.addEventListener('click', changeQuestions);
+            submitBtn.addEventListener('click', submitQuiz);
+            restartBtn.addEventListener('click', restartQuiz);
+            tryAgainBtn.addEventListener('click', tryAgain);
+            
+            // مستمعي أحداث نقاط المجموعات
+            document.querySelectorAll('.set-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const setIndex = parseInt(dot.getAttribute('data-set'));
+                    goToSet(setIndex);
+                });
+            });
+            
+            // مستمع حدث زر الوضع الليلي
+            themeToggle.addEventListener('click', toggleTheme);
+        }
+
+        // تبديل الوضع الليلي/النهاري
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            
+            // تغيير الأيقونة
+            const icon = themeToggle.querySelector('i');
+            if (isDarkMode) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        // تحميل تفضيلات الوضع
+        function loadThemePreference() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                const icon = themeToggle.querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // بدء الاختبار
+        function startQuiz(subject) {
+            currentSubject = subject;
+            generateNewQuestions();
+            
+            // تحديث واجهة المستخدم
+            subjectsContainer.style.display = 'none';
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            
+            // تحديث عنوان الاختبار
+            const subjectName = subjects.find(s => s.id === subject)?.name || 'الاختبار';
+            quizTitle.textContent = `اختبار ${subjectName}`;
+            
+            showSet(0);
+        }
+
+        // توليد أسئلة جديدة بدون تكرار
+        function generateNewQuestions() {
+            usedQuestionIndices.clear();
+            currentQuestions = [];
+            userAnswers = new Array(totalQuestions).fill(null);
+            currentSetIndex = 0;
+            score = 0;
+            
+            const questionBank = questionBanks[currentSubject] || questionBanks.computer;
+            
+            // إذا كان بنك الأسئلة أقل من 40 سؤالاً، نكرر بعض الأسئلة مع تعديلها
+            if (questionBank.length < totalQuestions) {
+                const neededQuestions = totalQuestions - questionBank.length;
+                for (let i = 0; i < neededQuestions; i++) {
+                    const originalIndex = i % questionBank.length;
+                    const originalQuestion = questionBank[originalIndex];
+                    const modifiedQuestion = {
+                        question: `${originalQuestion.question} (${i + 1})`,
+                        options: [...originalQuestion.options],
+                        correct: originalQuestion.correct
+                    };
+                    questionBank.push(modifiedQuestion);
+                }
+            }
+            
+            // اختيار 40 سؤالاً عشوائياً بدون تكرار
+            const indices = [];
+            for (let i = 0; i < questionBank.length; i++) {
+                indices.push(i);
+            }
+            
+            // خلط المؤشرات عشوائياً
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            
+            // اختيار 40 سؤالاً أولاً
+            for (let i = 0; i < totalQuestions; i++) {
+                currentQuestions.push(questionBank[indices[i]]);
+                usedQuestionIndices.add(indices[i]);
+            }
+        }
+
+        // تغيير الأسئلة
+        function changeQuestions() {
+            generateNewQuestions();
+            showSet(currentSetIndex);
+            
+            // إظهار رسالة للمستخدم
+            alert("تم توليد أسئلة جديدة للتدريب");
+        }
+
+        // عرض مجموعة الأسئلة
+        function showSet(setIndex) {
+            currentSetIndex = setIndex;
+            const startIndex = setIndex * questionsPerSet;
+            const endIndex = startIndex + questionsPerSet;
+            const setQuestions = currentQuestions.slice(startIndex, endIndex);
+            
+            // تحديث واجهة المستخدم
+            updateSetIndicator();
+            updateQuestionCounter();
+            
+            // عرض الأسئلة
+            questionsContainer.innerHTML = '';
+            
+            setQuestions.forEach((question, index) => {
+                const globalIndex = startIndex + index;
+                const questionElement = createQuestionElement(question, globalIndex);
+                questionsContainer.appendChild(questionElement);
+            });
+            
+            // تحديث أزرار التنقل
+            updateNavigationButtons();
+        }
+
+        // إنشاء عنصر السؤال
+        function createQuestionElement(question, globalIndex) {
+            const questionBox = document.createElement('div');
+            questionBox.className = `question-box set-${currentSetIndex + 1}`;
+            
+            const questionNumber = document.createElement('div');
+            questionNumber.className = 'question-number';
+            questionNumber.textContent = `السؤال ${globalIndex + 1}`;
+            
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.textContent = question.question;
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'options';
+            
+            const optionLetters = ['أ', 'ب', 'ج', 'د'];
+            
+            question.options.forEach((option, optionIndex) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                if (userAnswers[globalIndex] === optionIndex) {
+                    optionElement.classList.add('selected');
+                }
+                
+                optionElement.innerHTML = `
+                    <div class="option-prefix">${optionLetters[optionIndex]}</div>
+                    <div class="option-text">${option}</div>
+                `;
+                
+                optionElement.addEventListener('click', () => selectOption(globalIndex, optionIndex));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            questionBox.appendChild(questionNumber);
+            questionBox.appendChild(questionText);
+            questionBox.appendChild(optionsContainer);
+            
+            return questionBox;
+        }
+
+        // اختيار إجابة
+        function selectOption(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            showSet(currentSetIndex); // إعادة عرض المجموعة لتحديث الخيارات المحددة
+        }
+
+        // تحديث مؤشر المجموعات
+        function updateSetIndicator() {
+            document.querySelectorAll('.set-dot').forEach((dot, index) => {
+                if (index === currentSetIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        // تحديث عداد الأسئلة
+        function updateQuestionCounter() {
+            const startQuestion = currentSetIndex * questionsPerSet + 1;
+            const endQuestion = Math.min((currentSetIndex + 1) * questionsPerSet, totalQuestions);
+            questionCounter.textContent = `المجموعة ${currentSetIndex + 1} من ${totalSets} (الأسئلة ${startQuestion}-${endQuestion})`;
+        }
+
+        // تحديث أزرار التنقل
+        function updateNavigationButtons() {
+            prevSetBtn.disabled = currentSetIndex === 0;
+            nextSetBtn.style.display = currentSetIndex < totalSets - 1 ? 'flex' : 'none';
+            submitBtn.style.display = currentSetIndex === totalSets - 1 ? 'flex' : 'none';
+        }
+
+        // الانتقال إلى المجموعة السابقة
+        function showPreviousSet() {
+            if (currentSetIndex > 0) {
+                showSet(currentSetIndex - 1);
+            }
+        }
+
+        // الانتقال إلى المجموعة التالية
+        function showNextSet() {
+            if (currentSetIndex < totalSets - 1) {
+                showSet(currentSetIndex + 1);
+            }
+        }
+
+        // الانتقال إلى مجموعة محددة
+        function goToSet(setIndex) {
+            if (setIndex >= 0 && setIndex < totalSets) {
+                showSet(setIndex);
+            }
+        }
+
+        // تسليم الإجابات
+        function submitQuiz() {
+            score = 0;
+            const wrongAnswers = [];
+            
+            // حساب النتيجة
+            currentQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.correct) {
+                    score += pointsPerQuestion;
+                } else {
+                    wrongAnswers.push({
+                        question: question.question,
+                        userAnswer: userAnswers[index] !== null ? question.options[userAnswers[index]] : "لم يتم الإجابة",
+                        correctAnswer: question.options[question.correct],
+                        questionNumber: index + 1
+                    });
+                }
+            });
+            
+            // عرض النتائج
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            
+            // عرض الدرجة النهائية
+            scoreValue.textContent = score.toFixed(1);
+            
+            // عرض الأسئلة الخاطئة
+            wrongAnswersContainer.innerHTML = '<h3 class="wrong-title">الأسئلة التي underperformed فيها</h3>';
+            
+            if (wrongAnswers.length > 0) {
+                wrongAnswers.forEach(item => {
+                    const wrongAnswerElement = document.createElement('div');
+                    wrongAnswerElement.className = 'wrong-item';
+                    wrongAnswerElement.innerHTML = `
+                        <div class="wrong-question">${item.questionNumber}. ${item.question}</div>
+                        <div class="answer-comparison">
+                            <div class="user-answer">إجابتك: ${item.userAnswer}</div>
+                            <div class="correct-answer">الإجابة الصحيحة: ${item.correctAnswer}</div>
+                        </div>
+                    `;
+                    wrongAnswersContainer.appendChild(wrongAnswerElement);
+                });
+            } else {
+                wrongAnswersContainer.innerHTML += '<p>تهانينا! لم توجد أي أخطاء في إجاباتك.</p>';
+            }
+        }
+
+        // العودة إلى الصفحة الرئيسية
+        function restartQuiz() {
+            subjectsContainer.style.display = 'grid';
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+        }
+
+        // المحاولة مرة أخرى
+        function tryAgain() {
+            changeQuestions();
+            subjectsContainer.style.display = 'none';
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+        }
+
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
